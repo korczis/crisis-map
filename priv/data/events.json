@@ -1,0 +1,106 @@
+[
+  {
+    "external_id": "event-101",
+    "title": "Dopravní nehoda",
+    "description": "Střet dvou osobních vozidel.",
+    "location": "Beroun",
+    "occurred_at": "2026-08-28T08:15:00Z",
+    "type": "traffic_accident"
+  },
+  {
+    "external_id": "event-102",
+    "title": "Požár rodinného domu",
+    "description": "Zasahují tři jednotky, nikdo nezraněn.",
+    "location": "Kladno",
+    "occurred_at": "2026-08-28T09:40:00Z",
+    "type": "fire"
+  },
+  {
+    "external_id": "event-103",
+    "title": "Únik provozních kapalin",
+    "description": "Olej na vozovce po nehodě nákladního vozu.",
+    "location": "  Praha  ",
+    "occurred_at": "2026-08-28T10:05:00Z",
+    "type": "HAZMAT"
+  },
+  {
+    "external_id": "event-101",
+    "title": "Dopravní nehoda",
+    "description": "Střet dvou osobních vozidel.",
+    "location": "Beroun",
+    "occurred_at": "2026-08-28T08:15:00Z",
+    "type": "traffic_accident"
+  },
+  {
+    "external_id": "event-104",
+    "title": "Rozvodněný potok",
+    "description": "Voda zaplavila sklepy v přilehlé ulici.",
+    "location": "Neznámé místečko u lesa",
+    "occurred_at": "2026-08-28T11:20:00Z",
+    "type": "flood"
+  },
+  {
+    "external_id": "event-105",
+    "title": "Technická pomoc",
+    "description": "Odstranění spadlého stromu z komunikace.",
+    "location": "Příbram",
+    "occurred_at": "2026-08-28T12:00:00Z",
+    "type": "technical_rescue"
+  },
+  {
+    "external_id": "event-106",
+    "title": "Požár v průmyslovém areálu",
+    "description": "Hoří skladová hala, vyhlášen druhý stupeň poplachu.",
+    "location": "Ostrava",
+    "occurred_at": "2026-08-28T13:30:00Z",
+    "type": "fire"
+  },
+  {
+    "external_id": "event-107",
+    "title": "Dopravní nehoda autobusu",
+    "description": "Autobus mimo vozovku, lehká zranění.",
+    "location": "Brno",
+    "occurred_at": "2026-08-28T14:10:00Z",
+    "type": "traffic_accident"
+  },
+  {
+    "external_id": "event-108",
+    "title": "Vyproštění osoby z výtahu",
+    "description": "Osoba uvězněna mezi patry.",
+    "location": "Plzeň",
+    "occurred_at": "2026-08-28T15:45:00Z",
+    "type": "technical_rescue"
+  },
+  {
+    "external_id": "event-109",
+    "title": "Zatopená silnice",
+    "description": "Přívalový déšť, silnice II. třídy neprůjezdná.",
+    "location": "Kolín",
+    "occurred_at": "2026-08-28T16:20:00Z",
+    "type": "flood"
+  },
+  {
+    "external_id": "event-110",
+    "title": "Neznámá látka v kanalizaci",
+    "description": "Zápach a pěna ve stoce, odebrány vzorky.",
+    "location": "Mladá Boleslav",
+    "occurred_at": "2026-08-28T17:05:00Z",
+    "type": "hazmat"
+  },
+  {
+    "external_id": "event-111",
+    "title": "Požár trávy",
+    "description": "Hoří travní porost u železniční trati.",
+    "location": "Kutná Hora",
+    "occurred_at": "2026-08-28T18:00:00Z",
+    "type": "fire"
+  },
+  {
+    "external_id": "event-112",
+    "title": "Nahlášená událost bez upřesnění",
+    "description": "Volající nedokázal upřesnit místo.",
+    "location": "",
+    "occurred_at": "2026-08-28T18:30:00Z",
+    "type": "other"
+  }
+]
