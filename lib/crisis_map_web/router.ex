@@ -17,21 +17,31 @@ defmodule CrisisMapWeb.Router do
   scope "/", CrisisMapWeb do
     pipe_through :browser
 
-    get "/", PageController, :home
+    live "/", MapLive, :index
+    live "/cockpit", CockpitLive, :index
+    get "/swagger", ApiDocsController, :swagger
   end
 
-  # Other scopes may use custom stacks.
-  # scope "/api", CrisisMapWeb do
-  #   pipe_through :api
-  # end
+  scope "/", CrisisMapWeb do
+    pipe_through :api
 
-  # Enable LiveDashboard and Swoosh mailbox preview in development
+    get "/openapi.json", ApiDocsController, :spec
+
+    # Model Context Protocol over HTTP JSON-RPC. Same registry, same handlers.
+    post "/mcp", MCPController, :rpc
+
+    # The REST surface is generated from the capability registry: one route per
+    # declared capability, all of them dispatched by the same controller. There
+    # is deliberately no place here to add an endpoint that the registry, the
+    # OpenAPI document and the documentation do not know about.
+    for capability <- CrisisMap.Capabilities.routes() do
+      match capability.http.method, capability.http.path, CapabilityController, :dispatch,
+        assigns: %{capability: capability.name},
+        as: nil
+    end
+  end
+
   if Application.compile_env(:crisis_map, :dev_routes) do
-    # If you want to use the LiveDashboard in production, you should put
-    # it behind authentication and allow only admins to access it.
-    # If your application does not have an admins-only section yet,
-    # you can use Plug.BasicAuth to set up some basic authentication
-    # as long as you are also using SSL (which you should anyway).
     import Phoenix.LiveDashboard.Router
 
     scope "/dev" do

@@ -59,6 +59,10 @@ config :crisis_map, dev_routes: true
 # Do not include metadata nor timestamps in development logs
 config :logger, :default_formatter, format: "[$level] $message\n"
 
+# Query debug is useful in the server log and noise in the CLI output;
+# `LOG_LEVEL=debug mix ...` brings it back when a query is in question.
+config :logger, level: String.to_existing_atom(System.get_env("LOG_LEVEL", "info"))
+
 # Set a higher stacktrace during development. Avoid configuring such
 # in production as building large stacktraces may be expensive.
 config :phoenix, :stacktrace_depth, 20

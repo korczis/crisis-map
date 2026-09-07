@@ -77,6 +77,15 @@ defmodule CrisisMap.Catalog do
     }
   ]
 
+  # Fixed points the radius search offers as a centre. They are data, not UI:
+  # the LiveView, the API examples and the documentation all read them here.
+  @reference_points [
+    %{id: "praha", label: "Praha", lat: 50.0755, lon: 14.4378},
+    %{id: "brno", label: "Brno", lat: 49.1951, lon: 16.6068},
+    %{id: "ostrava", label: "Ostrava", lat: 49.8209, lon: 18.2625},
+    %{id: "plzen", label: "Plzeň", lat: 49.7384, lon: 13.3736}
+  ]
+
   @fallback_event_type "other"
 
   @doc "Every declared event type, in display order."
@@ -111,6 +120,13 @@ defmodule CrisisMap.Catalog do
       type -> type.color
     end
   end
+
+  @doc "Fixed centres offered by the radius search."
+  @spec reference_points() :: [map()]
+  def reference_points, do: @reference_points
+
+  @spec reference_point(String.t()) :: map() | nil
+  def reference_point(id), do: Enum.find(@reference_points, &(&1.id == id))
 
   @spec geocoding_statuses() :: [map()]
   def geocoding_statuses, do: @geocoding_statuses
