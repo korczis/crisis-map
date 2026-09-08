@@ -11,10 +11,37 @@ defmodule CrisisMapWeb.MapLiveTest do
 
   setup do
     %{
-      fire: event_fixture(%{external_id: "praha-fire", title: "Požár haly", type: "fire", location_text: "Praha", at: {50.0755, 14.4378}}),
-      crash: event_fixture(%{external_id: "beroun-crash", title: "Nehoda u Berouna", type: "traffic_accident", location_text: "Beroun", at: {49.9639, 14.0722}}),
-      far: event_fixture(%{external_id: "ostrava-fire", title: "Požár v Ostravě", type: "fire", location_text: "Ostrava", at: {49.8209, 18.2625}}),
-      unlocated: event_fixture(%{external_id: "nowhere", title: "Rozvodněný potok", type: "flood", location_text: "Neznámé místečko u lesa"})
+      fire:
+        event_fixture(%{
+          external_id: "praha-fire",
+          title: "Požár haly",
+          type: "fire",
+          location_text: "Praha",
+          at: {50.0755, 14.4378}
+        }),
+      crash:
+        event_fixture(%{
+          external_id: "beroun-crash",
+          title: "Nehoda u Berouna",
+          type: "traffic_accident",
+          location_text: "Beroun",
+          at: {49.9639, 14.0722}
+        }),
+      far:
+        event_fixture(%{
+          external_id: "ostrava-fire",
+          title: "Požár v Ostravě",
+          type: "fire",
+          location_text: "Ostrava",
+          at: {49.8209, 18.2625}
+        }),
+      unlocated:
+        event_fixture(%{
+          external_id: "nowhere",
+          title: "Rozvodněný potok",
+          type: "flood",
+          location_text: "Neznámé místečko u lesa"
+        })
     }
   end
 
@@ -82,7 +109,10 @@ defmodule CrisisMapWeb.MapLiveTest do
     assert html =~ "km"
   end
 
-  test "clicking an event shows type, title, location, time and description", %{conn: conn, fire: fire} do
+  test "clicking an event shows type, title, location, time and description", %{
+    conn: conn,
+    fire: fire
+  } do
     {:ok, live, _html} = live(conn, ~p"/")
 
     html =
@@ -106,7 +136,10 @@ defmodule CrisisMapWeb.MapLiveTest do
     assert_push_event(live, "focus", %{lat: 50.0755, lon: 14.4378})
   end
 
-  test "an event without a position shows why instead of showing coordinates", %{conn: conn, unlocated: unlocated} do
+  test "an event without a position shows why instead of showing coordinates", %{
+    conn: conn,
+    unlocated: unlocated
+  } do
     {:ok, live, _html} = live(conn, ~p"/")
 
     html = live |> element("button[phx-value-id='#{unlocated.id}']") |> render_click()

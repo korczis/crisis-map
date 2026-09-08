@@ -59,7 +59,8 @@ defmodule CrisisMap.DoctrineTest do
       reference = Docs.capabilities_markdown()
 
       for capability <- Capabilities.all() do
-        assert reference =~ capability.name, "#{capability.name}: missing from docs/CAPABILITIES.md"
+        assert reference =~ capability.name,
+               "#{capability.name}: missing from docs/CAPABILITIES.md"
       end
     end
   end
@@ -77,7 +78,10 @@ defmodule CrisisMap.DoctrineTest do
     test "no hand-written API specification is kept alongside the inferred one" do
       hand_written =
         Path.wildcard("{docs,priv,assets}/**/*.{yaml,yml}")
-        |> Enum.filter(&(String.contains?(Path.basename(&1), "openapi") or String.contains?(Path.basename(&1), "swagger")))
+        |> Enum.filter(
+          &(String.contains?(Path.basename(&1), "openapi") or
+              String.contains?(Path.basename(&1), "swagger"))
+        )
 
       assert hand_written == [],
              "a second definition of the API exists and will drift: #{inspect(hand_written)}"
@@ -98,7 +102,9 @@ defmodule CrisisMap.DoctrineTest do
       paths = OpenAPI.spec()["paths"]
 
       operation_ids =
-        for {_path, operations} <- paths, {_method, operation} <- operations, do: operation["operationId"]
+        for {_path, operations} <- paths,
+            {_method, operation} <- operations,
+            do: operation["operationId"]
 
       for capability <- Capabilities.all() do
         assert capability.name in operation_ids,
@@ -149,7 +155,9 @@ defmodule CrisisMap.DoctrineTest do
       types = Catalog.event_types()
 
       assert length(Enum.uniq_by(types, & &1.id)) == length(types)
-      assert length(Enum.uniq_by(types, & &1.color)) == length(types), "two types share a map colour"
+
+      assert length(Enum.uniq_by(types, & &1.color)) == length(types),
+             "two types share a map colour"
 
       for type <- types do
         assert type.id =~ ~r/^[a-z_]+$/
@@ -206,5 +214,35 @@ defmodule CrisisMap.DoctrineTest do
       {"inputSchema", value} -> {:inputSchema, value}
       {key, value} -> {String.to_atom(key), value}
     end)
+  end
+
+  describe "the doctrine is enforced" do
+    test "every rule names a test that enforces it" do
+      sources = Enum.map_join(@test_sources, "\n", &File.read!/1)
+      doctrine = File.read!("docs/DOCTRINE.md")
+
+      named_tests = Regex.scan(~r/`test "([^"]+)"`/, doctrine, capture: :all_but_first)
+
+      assert named_tests != [], "docs/DOCTRINE.md names no enforcing tests"
+
+      for [name] <- named_tests do
+        assert String.contains?(sources, "test \"#{name}\""),
+               "docs/DOCTRINE.md names a test that does not exist: #{inspect(name)}"
+      end
+    end
+
+    test "every rule in the doctrine has an enforcement clause" do
+      rules =
+        "docs/DOCTRINE.md"
+        |> File.read!()
+        |> String.split(~r/^## /m)
+        |> Enum.drop(1)
+
+      for rule <- rules do
+        [heading | _] = String.split(rule, "\n")
+
+        assert rule =~ "Enforced by:", "doctrine rule #{inspect(heading)} names no enforcing test"
+      end
+    end
   end
 end

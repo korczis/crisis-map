@@ -167,7 +167,8 @@ defmodule CrisisMap.Capability do
          |> maybe_put("example", Map.get(param, :example))}
       end)
 
-    required = params |> Enum.filter(&Map.get(&1, :required, false)) |> Enum.map(&to_string(&1.name))
+    required =
+      params |> Enum.filter(&Map.get(&1, :required, false)) |> Enum.map(&to_string(&1.name))
 
     %{"type" => "object", "properties" => properties, "required" => required}
   end

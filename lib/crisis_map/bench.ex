@@ -18,7 +18,12 @@ defmodule CrisisMap.Bench do
 
   @default_iterations 20
 
-  @type case_spec :: %{capability: String.t(), description: String.t(), params: map(), iterations: pos_integer()}
+  @type case_spec :: %{
+          capability: String.t(),
+          description: String.t(),
+          params: map(),
+          iterations: pos_integer()
+        }
 
   @doc "Every benchmark case."
   @spec inventory(keyword()) :: [case_spec()]

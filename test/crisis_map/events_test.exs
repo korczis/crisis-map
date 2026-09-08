@@ -132,7 +132,8 @@ defmodule CrisisMap.EventsTest do
     end
 
     test "combines with the type filter" do
-      events = Events.list_events(%{within: %{lat: 50.0755, lon: 14.4378, radius_km: 100}, type: "fire"})
+      events =
+        Events.list_events(%{within: %{lat: 50.0755, lon: 14.4378, radius_km: 100}, type: "fire"})
 
       assert Enum.map(events, & &1.external_id) == ["praha"]
     end
@@ -142,7 +143,14 @@ defmodule CrisisMap.EventsTest do
     setup do
       create(%{external_id: "a", type: "fire", occurred_at: ~U[2026-08-28 08:00:00Z]})
       create(%{external_id: "b", type: "flood", occurred_at: ~U[2026-08-28 10:00:00Z]})
-      create(%{external_id: "c", type: "fire", located: false, occurred_at: ~U[2026-08-28 07:00:00Z]})
+
+      create(%{
+        external_id: "c",
+        type: "fire",
+        located: false,
+        occurred_at: ~U[2026-08-28 07:00:00Z]
+      })
+
       :ok
     end
 
@@ -151,7 +159,8 @@ defmodule CrisisMap.EventsTest do
     end
 
     test "filters by type" do
-      assert ["a", "c"] = Events.list_events(%{type: "fire"}) |> Enum.map(& &1.external_id) |> Enum.sort()
+      assert ["a", "c"] =
+               Events.list_events(%{type: "fire"}) |> Enum.map(& &1.external_id) |> Enum.sort()
     end
 
     test "`all` and no filter mean the same thing" do

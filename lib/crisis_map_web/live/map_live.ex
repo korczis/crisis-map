@@ -137,7 +137,9 @@ defmodule CrisisMapWeb.MapLive do
 
   defp circle(_center, nil), do: nil
   defp circle(nil, _radius_km), do: nil
-  defp circle(center, radius_km), do: %{lat: center.lat, lon: center.lon, radius_m: radius_km * 1000}
+
+  defp circle(center, radius_km),
+    do: %{lat: center.lat, lon: center.lon, radius_m: radius_km * 1000}
 
   defp distance(%Event{distance_m: nil}), do: nil
   defp distance(%Event{distance_m: metres}), do: "#{Float.round(metres / 1000, 1)} km"
@@ -198,7 +200,11 @@ defmodule CrisisMapWeb.MapLive do
             <label class="text-xs uppercase opacity-60">
               Okolí bodu
               <select name="center" class="select select-xs select-bordered block mt-1">
-                <option :for={point <- @reference_points} value={point.id} selected={point.id == @center_id}>
+                <option
+                  :for={point <- @reference_points}
+                  value={point.id}
+                  selected={point.id == @center_id}
+                >
                   {point.label}
                 </option>
               </select>
@@ -230,8 +236,7 @@ defmodule CrisisMapWeb.MapLive do
                 <span
                   class="mt-1 w-3 h-3 rounded-full shrink-0"
                   style={"background: #{Catalog.event_type_color(@selected.type)}"}
-                >
-                </span>
+                ></span>
                 <div class="flex-1">
                   <p class="text-xs uppercase opacity-60">
                     {Catalog.event_type_label(@selected.type)}
@@ -250,9 +255,14 @@ defmodule CrisisMapWeb.MapLive do
                     <dt class="opacity-60">Souřadnice</dt>
                     <dd>
                       <%= if Event.located?(@selected) do %>
-                        {Float.round(Event.latitude(@selected), 5)},
-                        {Float.round(Event.longitude(@selected), 5)}
-                        <span :if={@selected.geocoding_candidates && @selected.geocoding_candidates > 1} class="opacity-60">
+                        {Float.round(Event.latitude(@selected), 5)}, {Float.round(
+                          Event.longitude(@selected),
+                          5
+                        )}
+                        <span
+                          :if={@selected.geocoding_candidates && @selected.geocoding_candidates > 1}
+                          class="opacity-60"
+                        >
                           ({@selected.geocoding_candidates} kandidátů, skóre {@selected.geocoding_confidence})
                         </span>
                       <% else %>
@@ -286,8 +296,7 @@ defmodule CrisisMapWeb.MapLive do
                 <span
                   class="w-2.5 h-2.5 rounded-full shrink-0"
                   style={"background: #{Catalog.event_type_color(event.type)}"}
-                >
-                </span>
+                ></span>
                 <span class="text-sm font-medium flex-1">{event.title}</span>
                 <span class="text-xs opacity-60">{when_occurred(event.occurred_at)}</span>
               </span>

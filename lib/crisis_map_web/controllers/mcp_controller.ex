@@ -21,9 +21,14 @@ defmodule CrisisMapWeb.MCPController do
     params = Map.get(request, "params", %{})
 
     case handle(method, params) do
-      :notification -> send_resp(conn, 202, "")
-      {:ok, result} -> json(conn, %{jsonrpc: "2.0", id: id, result: result})
-      {:error, code, message} -> json(conn, %{jsonrpc: "2.0", id: id, error: %{code: code, message: message}})
+      :notification ->
+        send_resp(conn, 202, "")
+
+      {:ok, result} ->
+        json(conn, %{jsonrpc: "2.0", id: id, result: result})
+
+      {:error, code, message} ->
+        json(conn, %{jsonrpc: "2.0", id: id, error: %{code: code, message: message}})
     end
   end
 
@@ -58,7 +63,11 @@ defmodule CrisisMapWeb.MCPController do
       capability ->
         case Capabilities.dispatch(capability.name, arguments) do
           {:ok, data} ->
-            {:ok, %{content: [%{type: "text", text: Jason.encode!(data, pretty: true)}], isError: false}}
+            {:ok,
+             %{
+               content: [%{type: "text", text: Jason.encode!(data, pretty: true)}],
+               isError: false
+             }}
 
           {:error, {_kind, message}} ->
             {:ok, %{content: [%{type: "text", text: to_string(message)}], isError: true}}

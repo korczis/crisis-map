@@ -57,7 +57,9 @@ defmodule Mix.Tasks.CrisisMap.Run do
       exit({:shutdown, 2})
     end
 
-    Map.new(parsed, fn {key, value} -> {key |> Atom.to_string() |> String.replace("-", "_"), value} end)
+    Map.new(parsed, fn {key, value} ->
+      {key |> Atom.to_string() |> String.replace("-", "_"), value}
+    end)
   end
 
   defp switch_key(name), do: name |> to_string() |> String.replace("_", "-") |> String.to_atom()

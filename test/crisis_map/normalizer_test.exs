@@ -46,11 +46,15 @@ defmodule CrisisMap.Ingest.NormalizerTest do
 
     test "canonicalises a type the source wrote differently" do
       assert {:ok, %{type: "hazmat"}} = Normalizer.normalize(Fixtures.raw(type: "HAZMAT"))
-      assert {:ok, %{type: "traffic_accident"}} = Normalizer.normalize(Fixtures.raw(type: "Traffic Accident"))
+
+      assert {:ok, %{type: "traffic_accident"}} =
+               Normalizer.normalize(Fixtures.raw(type: "Traffic Accident"))
     end
 
     test "files an unknown type under the catalog fallback rather than losing the event" do
-      assert {:ok, %{type: "other"}} = Normalizer.normalize(Fixtures.raw(type: "meteorite_strike"))
+      assert {:ok, %{type: "other"}} =
+               Normalizer.normalize(Fixtures.raw(type: "meteorite_strike"))
+
       assert {:ok, %{type: "other"}} = Normalizer.normalize(Fixtures.raw() |> Map.delete("type"))
     end
 
@@ -58,8 +62,11 @@ defmodule CrisisMap.Ingest.NormalizerTest do
       assert {:error, {:missing, :external_id}} =
                Normalizer.normalize(Fixtures.raw(external_id: ""))
 
-      assert {:error, {:missing, :title}} = Normalizer.normalize(Fixtures.raw() |> Map.delete("title"))
-      assert {:error, {:missing, :occurred_at}} = Normalizer.normalize(Fixtures.raw() |> Map.delete("occurred_at"))
+      assert {:error, {:missing, :title}} =
+               Normalizer.normalize(Fixtures.raw() |> Map.delete("title"))
+
+      assert {:error, {:missing, :occurred_at}} =
+               Normalizer.normalize(Fixtures.raw() |> Map.delete("occurred_at"))
     end
 
     test "rejects an unparsable timestamp instead of guessing one" do

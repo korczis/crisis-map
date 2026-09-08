@@ -74,7 +74,10 @@ defmodule CrisisMap.IngestTest do
     end
 
     test "an unknown location keeps the event, keeps the text and invents no coordinates" do
-      report = Ingest.import_records([Fixtures.raw(external_id: "event-x", location: "Neznámé místečko u lesa")])
+      report =
+        Ingest.import_records([
+          Fixtures.raw(external_id: "event-x", location: "Neznámé místečko u lesa")
+        ])
 
       assert report.not_found == 1
       assert report.inserted == 1
@@ -97,7 +100,11 @@ defmodule CrisisMap.IngestTest do
     test "a geocoder that is down costs the record its position, not the import" do
       Fake.always({:error, {:transport, :timeout}})
 
-      report = Ingest.import_records([Fixtures.raw(), Fixtures.raw(external_id: "event-102", location: "Praha")])
+      report =
+        Ingest.import_records([
+          Fixtures.raw(),
+          Fixtures.raw(external_id: "event-102", location: "Praha")
+        ])
 
       assert report.total == 2
       assert report.inserted == 2

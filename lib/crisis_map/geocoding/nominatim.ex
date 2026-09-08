@@ -30,7 +30,8 @@ defmodule CrisisMap.Geocoding.Nominatim do
       addressdetails: 0
     ]
 
-    params = if country_codes(), do: Keyword.put(params, :countrycodes, country_codes()), else: params
+    params =
+      if country_codes(), do: Keyword.put(params, :countrycodes, country_codes()), else: params
 
     case request("/search", params) do
       {:ok, %Req.Response{status: 200, body: results}} when is_list(results) ->
@@ -121,5 +122,7 @@ defmodule CrisisMap.Geocoding.Nominatim do
   defp country_codes, do: Keyword.get(config(), :country_codes)
   defp receive_timeout, do: Keyword.get(config(), :receive_timeout, 5_000)
   defp connect_timeout, do: Keyword.get(config(), :connect_timeout, 2_000)
-  defp user_agent, do: Keyword.get(config(), :user_agent, "crisis_map/0.1 (local academy exercise)")
+
+  defp user_agent,
+    do: Keyword.get(config(), :user_agent, "crisis_map/0.1 (local academy exercise)")
 end

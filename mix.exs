@@ -27,7 +27,7 @@ defmodule CrisisMap.MixProject do
 
   def cli do
     [
-      preferred_envs: [precommit: :test]
+      preferred_envs: [precommit: :test, gates: :test]
     ]
   end
 
@@ -94,6 +94,14 @@ defmodule CrisisMap.MixProject do
         "tailwind crisis_map --minify",
         "esbuild crisis_map --minify",
         "phx.digest"
+      ],
+      # Everything CI enforces, runnable locally in one word. A change that
+      # passes `mix gates` is a change that passes the pipeline.
+      gates: [
+        "format --check-formatted",
+        "compile --warnings-as-errors",
+        "crisis_map.docs --check",
+        "test"
       ],
       precommit: ["compile --warnings-as-errors", "deps.unlock --unused", "format", "test"]
     ]

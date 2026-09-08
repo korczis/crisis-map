@@ -13,9 +13,26 @@ defmodule CrisisMapWeb.ApiTest do
   describe "the generated REST routes" do
     setup do
       %{
-        praha: event_fixture(%{external_id: "praha", type: "fire", location_text: "Praha", at: {50.0755, 14.4378}}),
-        ostrava: event_fixture(%{external_id: "ostrava", type: "fire", location_text: "Ostrava", at: {49.8209, 18.2625}}),
-        nowhere: event_fixture(%{external_id: "nowhere", type: "flood", location_text: "Neznámé místečko u lesa"})
+        praha:
+          event_fixture(%{
+            external_id: "praha",
+            type: "fire",
+            location_text: "Praha",
+            at: {50.0755, 14.4378}
+          }),
+        ostrava:
+          event_fixture(%{
+            external_id: "ostrava",
+            type: "fire",
+            location_text: "Ostrava",
+            at: {49.8209, 18.2625}
+          }),
+        nowhere:
+          event_fixture(%{
+            external_id: "nowhere",
+            type: "flood",
+            location_text: "Neznámé místečko u lesa"
+          })
       }
     end
 
@@ -56,7 +73,10 @@ defmodule CrisisMapWeb.ApiTest do
     end
 
     test "the spatial route does not collide with the :id route", %{conn: conn} do
-      body = conn |> get(~p"/api/v1/events/near?lat=50.0755&lon=14.4378&radius_km=50") |> json_response(200)
+      body =
+        conn
+        |> get(~p"/api/v1/events/near?lat=50.0755&lon=14.4378&radius_km=50")
+        |> json_response(200)
 
       assert body["capability"] == "events.near"
       assert [%{"external_id" => "praha", "distance_m" => distance}] = body["data"]
@@ -64,16 +84,29 @@ defmodule CrisisMapWeb.ApiTest do
     end
 
     test "a malformed parameter is a 400 with the capability's own message", %{conn: conn} do
-      body = conn |> get(~p"/api/v1/events/near?lat=north&lon=14.4&radius_km=50") |> json_response(400)
+      body =
+        conn |> get(~p"/api/v1/events/near?lat=north&lon=14.4&radius_km=50") |> json_response(400)
 
       assert body["error"]["kind"] == "bad_request"
       assert body["error"]["message"] =~ "is not a number"
     end
 
     test "stats, catalog and health answer over HTTP too", %{conn: conn} do
-      assert conn |> get(~p"/api/v1/events/stats") |> json_response(200) |> get_in(["data", "total"]) == 3
-      assert conn |> get(~p"/api/v1/catalog/event-types") |> json_response(200) |> Map.fetch!("data") |> length() == 6
-      assert conn |> get(~p"/api/v1/health") |> json_response(200) |> get_in(["data", "database", "reachable"])
+      assert conn
+             |> get(~p"/api/v1/events/stats")
+             |> json_response(200)
+             |> get_in(["data", "total"]) == 3
+
+      assert conn
+             |> get(~p"/api/v1/catalog/event-types")
+             |> json_response(200)
+             |> Map.fetch!("data")
+             |> length() == 6
+
+      assert conn
+             |> get(~p"/api/v1/health")
+             |> json_response(200)
+             |> get_in(["data", "database", "reachable"])
     end
 
     test "the registry describes itself over HTTP", %{conn: conn} do
@@ -93,13 +126,25 @@ defmodule CrisisMapWeb.ApiTest do
       # Phoenix path parameters are rendered the way OpenAPI writes them.
       assert Map.has_key?(spec["paths"], "/api/v1/events/{id}")
       assert get_in(spec, ["paths", "/api/v1/events", "get", "operationId"]) == "events.list"
-      assert get_in(spec, ["paths", "/api/v1/ingest/import", "post", "operationId"]) == "ingest.import"
+
+      assert get_in(spec, ["paths", "/api/v1/ingest/import", "post", "operationId"]) ==
+               "ingest.import"
     end
 
     test "carries each capability's declared examples", %{conn: conn} do
       spec = conn |> get(~p"/openapi.json") |> json_response(200)
 
-      examples = get_in(spec, ["paths", "/api/v1/geocoding/lookup", "get", "responses", "200", "content", "application/json", "examples"])
+      examples =
+        get_in(spec, [
+          "paths",
+          "/api/v1/geocoding/lookup",
+          "get",
+          "responses",
+          "200",
+          "content",
+          "application/json",
+          "examples"
+        ])
 
       assert map_size(examples) == 2
     end
@@ -155,7 +200,12 @@ defmodule CrisisMapWeb.ApiTest do
     test "an unknown tool is a JSON-RPC error", %{conn: conn} do
       body =
         conn
-        |> post("/mcp", %{"jsonrpc" => "2.0", "id" => 9, "method" => "tools/call", "params" => %{"name" => "nope"}})
+        |> post("/mcp", %{
+          "jsonrpc" => "2.0",
+          "id" => 9,
+          "method" => "tools/call",
+          "params" => %{"name" => "nope"}
+        })
         |> json_response(200)
 
       assert body["error"]["code"] == -32602

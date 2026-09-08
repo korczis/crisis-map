@@ -44,7 +44,8 @@ defmodule CrisisMap.Catalog do
     %{
       id: "other",
       label: "Jiná událost",
-      description: "Anything the source did not classify. Also the fallback for an unknown input type.",
+      description:
+        "Anything the source did not classify. Also the fallback for an unknown input type.",
       color: "#64748b"
     }
   ]

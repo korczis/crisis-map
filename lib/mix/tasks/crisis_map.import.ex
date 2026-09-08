@@ -56,6 +56,7 @@ defmodule Mix.Tasks.CrisisMap.Import do
 
       errors ->
         Mix.shell().info("  #{length(errors)} record(s) reported a problem:")
+
         for %{subject: subject, reason: reason} <- errors do
           Mix.shell().info("    #{subject}: #{reason}")
         end

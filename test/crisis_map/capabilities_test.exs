@@ -34,7 +34,12 @@ defmodule CrisisMap.CapabilitiesTest do
     test "accepts string keys and string values, as HTTP and the shell deliver them" do
       event_fixture(%{external_id: "event-101", at: {50.0, 14.0}})
 
-      assert {:ok, [event]} = Capabilities.dispatch("events.list", %{"type" => "traffic_accident", "limit" => "5"})
+      assert {:ok, [event]} =
+               Capabilities.dispatch("events.list", %{
+                 "type" => "traffic_accident",
+                 "limit" => "5"
+               })
+
       assert event.external_id == "event-101"
     end
 

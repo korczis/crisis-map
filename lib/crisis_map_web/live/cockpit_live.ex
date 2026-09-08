@@ -30,7 +30,8 @@ defmodule CrisisMapWeb.CockpitLive do
 
   @impl true
   def handle_event("select", %{"name" => name}, socket) do
-    {:noreply, assign(socket, selected: Capabilities.get(name), result: nil, error: nil, duration_ms: nil)}
+    {:noreply,
+     assign(socket, selected: Capabilities.get(name), result: nil, error: nil, duration_ms: nil)}
   end
 
   def handle_event("run", params, socket) do
@@ -116,7 +117,7 @@ defmodule CrisisMapWeb.CockpitLive do
                 />
                 <span class="text-xs opacity-60">{param.description}</span>
               </label>
-              <button class={["btn btn-sm", @selected.mutating && "btn-warning" || "btn-primary"]}>
+              <button class={["btn btn-sm", (@selected.mutating && "btn-warning") || "btn-primary"]}>
                 Spustit{if @selected.mutating, do: " (mění data)", else: ""}
               </button>
             </form>

@@ -89,7 +89,8 @@ defmodule CrisisMap.Events do
   one. Only *source* fields are written here — a re-import never destroys a
   position we already resolved.
   """
-  @spec upsert_from_source(map()) :: {:ok, {:inserted | :updated, Event.t()}} | {:error, Ecto.Changeset.t()}
+  @spec upsert_from_source(map()) ::
+          {:ok, {:inserted | :updated, Event.t()}} | {:error, Ecto.Changeset.t()}
   def upsert_from_source(attrs) do
     case get_event_by_external_id(attrs.external_id) do
       nil ->

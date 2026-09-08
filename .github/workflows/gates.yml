@@ -1,0 +1,112 @@
+name: gates
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+
+env:
+  MIX_ENV: test
+  GEO_DB_USER: academy
+  GEO_DB_PASSWORD: academy_local_dev_only
+  GEO_DB_HOST: localhost
+  GEO_DB_PORT: "5432"
+
+jobs:
+  gates:
+    name: format, warnings, docs, tests
+    runs-on: ubuntu-latest
+
+    services:
+      postgis:
+        # The application requires PostGIS, so the pipeline runs on PostGIS —
+        # a plain postgres image would let a broken spatial query pass.
+        image: postgis/postgis:16-3.4
+        env:
+          POSTGRES_USER: academy
+          POSTGRES_PASSWORD: academy_local_dev_only
+          POSTGRES_DB: academy_geo
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U academy"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: erlef/setup-beam@v1
+        with:
+          otp-version: "28.1"
+          elixir-version: "1.19.0"
+
+      - uses: actions/cache@v4
+        with:
+          path: |
+            deps
+            _build
+          key: ${{ runner.os }}-mix-${{ hashFiles('**/mix.lock') }}
+          restore-keys: ${{ runner.os }}-mix-
+
+      - run: mix deps.get
+
+      # Every gate is separate so the log says which contract was broken.
+      - name: formatted
+        run: mix format --check-formatted
+
+      - name: compiles without warnings
+        run: mix compile --warnings-as-errors
+
+      - name: generated documentation is in sync with the registry
+        run: mix crisis_map.docs --check
+
+      - name: database
+        run: mix ecto.create && mix ecto.migrate
+
+      - name: tests
+        run: mix test
+
+      - name: benchmarks run
+        run: mix crisis_map.bench --iterations 5 --json bench/results.json
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: benchmarks
+          path: bench/results.json
+
+  pages:
+    name: publish the generated site
+    needs: gates
+    if: github.ref == 'refs/heads/master'
+    runs-on: ubuntu-latest
+
+    permissions:
+      pages: write
+      id-token: write
+
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: erlef/setup-beam@v1
+        with:
+          otp-version: "28.1"
+          elixir-version: "1.19.0"
+
+      - run: mix deps.get
+
+      # The site is generated from the registry, so publishing it cannot
+      # publish a description of a system other than the one just tested.
+      - run: MIX_ENV=dev mix crisis_map.site --out _site
+
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+      - id: deploy
+        uses: actions/deploy-pages@v4
