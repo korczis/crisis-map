@@ -2,7 +2,7 @@ name: gates
 
 on:
   push:
-    branches: [master]
+    branches: [main]
   pull_request:
 
 env:
@@ -79,7 +79,7 @@ jobs:
   pages:
     name: publish the generated site
     needs: gates
-    if: github.ref == 'refs/heads/master'
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
 
     permissions:
