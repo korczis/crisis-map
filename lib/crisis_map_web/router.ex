@@ -1,4 +1,11 @@
 defmodule CrisisMapWeb.Router do
+  @moduledoc """
+  Routes.
+
+  The browser routes are written here; the `/api/v1` routes are not — they are
+  generated from `CrisisMap.Capabilities`, one per declared capability, so the
+  REST surface cannot drift from the registry that documents it.
+  """
   use CrisisMapWeb, :router
 
   pipeline :browser do
@@ -48,7 +55,6 @@ defmodule CrisisMapWeb.Router do
       pipe_through :browser
 
       live_dashboard "/dashboard", metrics: CrisisMapWeb.Telemetry
-      forward "/mailbox", Plug.Swoosh.MailboxPreview
     end
   end
 end

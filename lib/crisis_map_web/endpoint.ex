@@ -1,4 +1,7 @@
 defmodule CrisisMapWeb.Endpoint do
+  @moduledoc """
+  The HTTP entry point: static assets, the LiveView socket and the router.
+  """
   use Phoenix.Endpoint, otp_app: :crisis_map
 
   # The session will be stored in the cookie and signed,

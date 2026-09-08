@@ -194,7 +194,7 @@ defmodule CrisisMapWeb.MapLive do
             </div>
           </div>
 
-          <form phx-change="filter_radius" class="flex gap-2 items-end">
+          <form id="radius-filter" phx-change="filter_radius" class="flex gap-2 items-end">
             <label class="text-xs uppercase opacity-60">
               Okolí bodu
               <select name="center" class="select select-xs select-bordered block mt-1">

@@ -1,4 +1,7 @@
 defmodule CrisisMapWeb.Telemetry do
+  @moduledoc """
+  Telemetry supervisor and the metric definitions the dashboard reads.
+  """
   use Supervisor
   import Telemetry.Metrics
 
