@@ -151,7 +151,7 @@ defmodule CrisisMap.Site do
       <head>
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <title>#{title} · Crisis Map</title>
+        <title>#{page_title(title)}</title>
         <style>
           :root { color-scheme: light dark; }
           body { margin: 0 auto; max-width: 52rem; padding: 2rem 1rem 6rem;
@@ -182,6 +182,10 @@ defmodule CrisisMap.Site do
     </html>
     """
   end
+
+  # "Crisis Map · Crisis Map" helps nobody.
+  defp page_title("Crisis Map"), do: "Crisis Map"
+  defp page_title(title), do: "#{title} · Crisis Map"
 
   defp escape(text) do
     text
