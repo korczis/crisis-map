@@ -8,12 +8,13 @@ defmodule CrisisMapWeb.CoreComponents do
   with doc strings and declarative assigns. You may customize and style
   them in any way you want, based on your application growth and needs.
 
-  The foundation for styling is Tailwind CSS, a utility-first CSS framework,
-  augmented with daisyUI, a Tailwind CSS plugin that provides UI components
-  and themes. Here are useful references:
+  The foundation for styling is Tailwind CSS with the Flowbite plugin. Every
+  component here is adapted from the Flowbite Pro admin templates: gray
+  surfaces (white/gray-800 on gray-50/gray-900), gray-200/gray-700 borders,
+  rounded-lg, and one primary accent. Here are useful references:
 
-    * [daisyUI](https://daisyui.com/docs/intro/) - a good place to get
-      started and see the available components.
+    * [Flowbite](https://flowbite.com/docs/getting-started/introduction/) - the
+      component library the markup and its JS behaviour come from.
 
     * [Tailwind CSS](https://tailwindcss.com) - the foundational framework
       we build on. You will use it for layout, sizing, flexbox, grid, and
@@ -63,25 +64,28 @@ defmodule CrisisMapWeb.CoreComponents do
       id={@id}
       phx-click={JS.push("lv:clear-flash", value: %{key: @kind}) |> hide("##{@id}")}
       role="alert"
-      class="toast toast-top toast-end z-50"
+      class="fixed top-20 right-4 z-50 flex w-80 max-w-[calc(100%-2rem)] items-start gap-3 rounded-lg border border-gray-200 bg-white p-4 text-gray-500 shadow-lg sm:w-96 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400"
       {@rest}
     >
       <div class={[
-        "alert w-80 sm:w-96 max-w-80 sm:max-w-96 text-wrap",
-        @kind == :info && "alert-info",
-        @kind == :error && "alert-error"
+        "inline-flex size-8 shrink-0 items-center justify-center rounded-lg",
+        @kind == :info && "bg-primary-100 text-primary-600 dark:bg-primary-800 dark:text-primary-200",
+        @kind == :error && "bg-red-100 text-red-600 dark:bg-red-800 dark:text-red-200"
       ]}>
-        <.icon :if={@kind == :info} name="hero-information-circle" class="size-5 shrink-0" />
-        <.icon :if={@kind == :error} name="hero-exclamation-circle" class="size-5 shrink-0" />
-        <div>
-          <p :if={@title} class="font-semibold">{@title}</p>
-          <p>{msg}</p>
-        </div>
-        <div class="flex-1" />
-        <button type="button" class="group self-start cursor-pointer" aria-label={gettext("close")}>
-          <.icon name="hero-x-mark" class="size-5 opacity-40 group-hover:opacity-70" />
-        </button>
+        <.icon :if={@kind == :info} name="hero-information-circle" class="size-5" />
+        <.icon :if={@kind == :error} name="hero-exclamation-circle" class="size-5" />
       </div>
+      <div class="flex-1 text-sm font-normal">
+        <p :if={@title} class="mb-1 font-semibold text-gray-900 dark:text-white">{@title}</p>
+        <p>{msg}</p>
+      </div>
+      <button
+        type="button"
+        class="-mx-1.5 -my-1.5 inline-flex size-8 cursor-pointer items-center justify-center rounded-lg p-1.5 text-gray-400 hover:bg-gray-100 hover:text-gray-900 focus:ring-2 focus:ring-gray-300 dark:text-gray-500 dark:hover:bg-gray-700 dark:hover:text-white"
+        aria-label={gettext("close")}
+      >
+        <.icon name="hero-x-mark" class="size-5" />
+      </button>
     </div>
     """
   end
@@ -101,11 +105,16 @@ defmodule CrisisMapWeb.CoreComponents do
   slot :inner_block, required: true
 
   def button(%{rest: rest} = assigns) do
-    variants = %{"primary" => "btn-primary", nil => "btn-primary btn-soft"}
+    variants = %{
+      "primary" =>
+        "text-white bg-primary-700 hover:bg-primary-800 focus:ring-primary-300 dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800",
+      nil =>
+        "text-gray-900 bg-white border border-gray-300 hover:bg-gray-100 focus:ring-primary-300 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700 dark:focus:ring-gray-700"
+    }
 
     assigns =
       assign_new(assigns, :class, fn ->
-        ["btn", Map.fetch!(variants, assigns[:variant])]
+        [button_base(), Map.fetch!(variants, assigns[:variant])]
       end)
 
     if rest[:href] || rest[:navigate] || rest[:patch] do
@@ -122,6 +131,26 @@ defmodule CrisisMapWeb.CoreComponents do
       """
     end
   end
+
+  @doc false
+  # The Pro button: rounded-lg, text-sm, a 4px focus ring in the variant's colour.
+  def button_base,
+    do:
+      "inline-flex items-center justify-center gap-2 py-2 px-3 text-sm font-medium text-center rounded-lg cursor-pointer focus:ring-4 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed"
+
+  @doc false
+  # The Pro form control and its label, shared by every input type.
+  def input_class,
+    do:
+      "block w-full p-2.5 text-sm text-gray-900 bg-gray-50 border border-gray-300 rounded-lg focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
+
+  @doc false
+  def input_error_class,
+    do:
+      "!border-red-500 !bg-red-50 !text-red-900 placeholder-red-700 focus:!ring-red-500 focus:!border-red-500 dark:!bg-gray-700 dark:!text-red-500"
+
+  @doc false
+  def label_class, do: "block mb-2 text-sm font-medium text-gray-900 dark:text-white"
 
   @doc """
   Renders an input with label and error messages.
@@ -212,7 +241,7 @@ defmodule CrisisMapWeb.CoreComponents do
       end)
 
     ~H"""
-    <div class="fieldset mb-2">
+    <div class="mb-4">
       <label for={@id}>
         <input
           type="hidden"
@@ -221,14 +250,17 @@ defmodule CrisisMapWeb.CoreComponents do
           disabled={@rest[:disabled]}
           form={@rest[:form]}
         />
-        <span class="label">
+        <span class="flex items-center gap-2 text-sm font-medium text-gray-900 dark:text-gray-300">
           <input
             type="checkbox"
             id={@id}
             name={@name}
             value="true"
             checked={@checked}
-            class={@class || "checkbox checkbox-sm"}
+            class={
+              @class ||
+                "size-4 text-primary-600 bg-gray-100 border-gray-300 rounded-sm focus:ring-primary-500 focus:ring-2 dark:focus:ring-primary-600 dark:ring-offset-gray-800 dark:bg-gray-700 dark:border-gray-600"
+            }
             {@rest}
           />{@label}
         </span>
@@ -240,13 +272,13 @@ defmodule CrisisMapWeb.CoreComponents do
 
   def input(%{type: "select"} = assigns) do
     ~H"""
-    <div class="fieldset mb-2">
+    <div class="mb-4">
       <label for={@id}>
-        <span :if={@label} class="label mb-1">{@label}</span>
+        <span :if={@label} class={label_class()}>{@label}</span>
         <select
           id={@id}
           name={@name}
-          class={[@class || "w-full select", @errors != [] && (@error_class || "select-error")]}
+          class={[@class || input_class(), @errors != [] && (@error_class || input_error_class())]}
           multiple={@multiple}
           {@rest}
         >
@@ -261,15 +293,15 @@ defmodule CrisisMapWeb.CoreComponents do
 
   def input(%{type: "textarea"} = assigns) do
     ~H"""
-    <div class="fieldset mb-2">
+    <div class="mb-4">
       <label for={@id}>
-        <span :if={@label} class="label mb-1">{@label}</span>
+        <span :if={@label} class={label_class()}>{@label}</span>
         <textarea
           id={@id}
           name={@name}
           class={[
-            @class || "w-full textarea",
-            @errors != [] && (@error_class || "textarea-error")
+            @class || input_class(),
+            @errors != [] && (@error_class || input_error_class())
           ]}
           {@rest}
         >{Phoenix.HTML.Form.normalize_value("textarea", @value)}</textarea>
@@ -282,17 +314,17 @@ defmodule CrisisMapWeb.CoreComponents do
   # All other inputs text, datetime-local, url, password, etc. are handled here...
   def input(assigns) do
     ~H"""
-    <div class="fieldset mb-2">
+    <div class="mb-4">
       <label for={@id}>
-        <span :if={@label} class="label mb-1">{@label}</span>
+        <span :if={@label} class={label_class()}>{@label}</span>
         <input
           type={@type}
           name={@name}
           id={@id}
           value={Phoenix.HTML.Form.normalize_value(@type, @value)}
           class={[
-            @class || "w-full input",
-            @errors != [] && (@error_class || "input-error")
+            @class || input_class(),
+            @errors != [] && (@error_class || input_error_class())
           ]}
           {@rest}
         />
@@ -305,10 +337,77 @@ defmodule CrisisMapWeb.CoreComponents do
   # Helper used by inputs to generate form errors
   defp error(assigns) do
     ~H"""
-    <p class="mt-1.5 flex gap-2 items-center text-sm text-error">
+    <p class="mt-2 flex gap-2 items-center text-sm text-red-600 dark:text-red-500">
       <.icon name="hero-exclamation-circle" class="size-5" />
       {render_slot(@inner_block)}
     </p>
+    """
+  end
+
+  @doc """
+  Renders the page header of the Pro admin shell: a breadcrumb, the page
+  title, an optional subtitle and the page's actions beside them.
+
+  Each crumb is a map with a `:label` and, except for the current page, a
+  `:navigate` path. The first crumb carries the home icon.
+
+      <.page_header crumbs={[%{label: "Mapa", navigate: ~p"/"}, %{label: "Cockpit"}]}>
+        Cockpit
+        <:subtitle>12 schopností</:subtitle>
+        <:actions><.button navigate={~p"/"}>Mapa</.button></:actions>
+      </.page_header>
+  """
+  attr :crumbs, :list, default: [], doc: "the breadcrumb, from the root to the current page"
+  slot :inner_block, required: true
+  slot :subtitle
+  slot :actions
+
+  def page_header(assigns) do
+    ~H"""
+    <div class="block items-center justify-between border-b border-gray-200 bg-white p-4 sm:flex lg:mt-1.5 dark:border-gray-700 dark:bg-gray-800">
+      <div class="w-full">
+        <nav :if={@crumbs != []} class="mb-4 flex" aria-label="Breadcrumb">
+          <ol class="inline-flex flex-wrap items-center gap-1 text-sm font-medium md:gap-2">
+            <li :for={{crumb, index} <- Enum.with_index(@crumbs)} class="inline-flex items-center">
+              <.icon
+                :if={index > 0}
+                name="hero-chevron-right"
+                class="mr-1 size-4 text-gray-400 md:mr-2"
+              />
+              <.link
+                :if={crumb[:navigate]}
+                navigate={crumb[:navigate]}
+                class="inline-flex items-center text-gray-700 hover:text-primary-600 dark:text-gray-300 dark:hover:text-white"
+              >
+                <.icon :if={index == 0} name="hero-home" class="mr-2.5 size-4" />
+                {crumb.label}
+              </.link>
+              <span
+                :if={!crumb[:navigate]}
+                class="inline-flex items-center text-gray-400 dark:text-gray-500"
+                aria-current="page"
+              >
+                <.icon :if={index == 0} name="hero-home" class="mr-2.5 size-4" />
+                {crumb.label}
+              </span>
+            </li>
+          </ol>
+        </nav>
+        <div class="flex flex-wrap items-end justify-between gap-4">
+          <div>
+            <h1 class="text-xl font-semibold text-gray-900 sm:text-2xl dark:text-white">
+              {render_slot(@inner_block)}
+            </h1>
+            <p :if={@subtitle != []} class="mt-1 text-sm font-normal text-gray-500 dark:text-gray-400">
+              {render_slot(@subtitle)}
+            </p>
+          </div>
+          <div :if={@actions != []} class="flex flex-wrap items-center gap-2 sm:gap-3">
+            {render_slot(@actions)}
+          </div>
+        </div>
+      </div>
+    </div>
     """
   end
 
@@ -323,10 +422,10 @@ defmodule CrisisMapWeb.CoreComponents do
     ~H"""
     <header class={[@actions != [] && "flex items-center justify-between gap-6", "pb-4"]}>
       <div>
-        <h1 class="text-lg font-semibold leading-8">
+        <h1 class="text-xl font-semibold text-gray-900 sm:text-2xl dark:text-white">
           {render_slot(@inner_block)}
         </h1>
-        <p :if={@subtitle != []} class="text-sm text-base-content/70">
+        <p :if={@subtitle != []} class="text-sm text-gray-500 dark:text-gray-400">
           {render_slot(@subtitle)}
         </p>
       </div>
@@ -367,34 +466,53 @@ defmodule CrisisMapWeb.CoreComponents do
       end
 
     ~H"""
-    <table class="table table-zebra">
-      <thead>
-        <tr>
-          <th :for={col <- @col}>{col[:label]}</th>
-          <th :if={@action != []}>
-            <span class="sr-only">{gettext("Actions")}</span>
-          </th>
-        </tr>
-      </thead>
-      <tbody id={@id} phx-update={is_struct(@rows, Phoenix.LiveView.LiveStream) && "stream"}>
-        <tr :for={row <- @rows} id={@row_id && @row_id.(row)}>
-          <td
-            :for={col <- @col}
-            phx-click={@row_click && @row_click.(row)}
-            class={@row_click && "hover:cursor-pointer"}
+    <div class="overflow-x-auto rounded-lg border border-gray-200 dark:border-gray-700">
+      <table class="min-w-full divide-y divide-gray-200 text-left text-sm dark:divide-gray-700">
+        <thead class="bg-gray-50 dark:bg-gray-700">
+          <tr>
+            <th
+              :for={col <- @col}
+              scope="col"
+              class="p-4 text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400"
+            >
+              {col[:label]}
+            </th>
+            <th :if={@action != []} scope="col" class="p-4">
+              <span class="sr-only">{gettext("Actions")}</span>
+            </th>
+          </tr>
+        </thead>
+        <tbody
+          id={@id}
+          phx-update={is_struct(@rows, Phoenix.LiveView.LiveStream) && "stream"}
+          class="divide-y divide-gray-200 bg-white dark:divide-gray-700 dark:bg-gray-800"
+        >
+          <tr
+            :for={row <- @rows}
+            id={@row_id && @row_id.(row)}
+            class="hover:bg-gray-100 dark:hover:bg-gray-700"
           >
-            {render_slot(col, @row_item.(row))}
-          </td>
-          <td :if={@action != []} class="w-0 font-semibold">
-            <div class="flex gap-4">
-              <%= for action <- @action do %>
-                {render_slot(action, @row_item.(row))}
-              <% end %>
-            </div>
-          </td>
-        </tr>
-      </tbody>
-    </table>
+            <td
+              :for={col <- @col}
+              phx-click={@row_click && @row_click.(row)}
+              class={[
+                "p-4 text-gray-900 whitespace-nowrap dark:text-white",
+                @row_click && "hover:cursor-pointer"
+              ]}
+            >
+              {render_slot(col, @row_item.(row))}
+            </td>
+            <td :if={@action != []} class="w-0 p-4 font-medium">
+              <div class="flex gap-4">
+                <%= for action <- @action do %>
+                  {render_slot(action, @row_item.(row))}
+                <% end %>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
     """
   end
 
@@ -414,12 +532,10 @@ defmodule CrisisMapWeb.CoreComponents do
 
   def list(assigns) do
     ~H"""
-    <ul class="list">
-      <li :for={item <- @item} class="list-row">
-        <div class="list-col-grow">
-          <div class="font-bold">{item.title}</div>
-          <div>{render_slot(item)}</div>
-        </div>
+    <ul class="divide-y divide-gray-200 dark:divide-gray-700">
+      <li :for={item <- @item} class="py-3 sm:py-4">
+        <div class="text-sm font-medium text-gray-900 dark:text-white">{item.title}</div>
+        <div class="text-sm text-gray-500 dark:text-gray-400">{render_slot(item)}</div>
       </li>
     </ul>
     """
