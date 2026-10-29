@@ -155,51 +155,77 @@ defmodule CrisisMapWeb.MapLive do
   defp status_note(%Event{geocoding_status: "pending"}), do: "čeká na geokódování"
   defp status_note(_), do: nil
 
+  # The Pro button group: the active filter is the primary button, the others
+  # the outlined secondary one.
+  defp filter_button_class(true),
+    do: [
+      filter_button_base(),
+      "border-primary-700 bg-primary-700 text-white hover:bg-primary-800 dark:border-primary-600 dark:bg-primary-600 dark:hover:bg-primary-700"
+    ]
+
+  defp filter_button_class(false),
+    do: [
+      filter_button_base(),
+      "border-gray-300 bg-white text-gray-900 hover:bg-gray-100 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700 dark:hover:text-white"
+    ]
+
+  defp filter_button_base,
+    do:
+      "inline-flex cursor-pointer items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs font-medium focus:outline-none focus:ring-4 focus:ring-primary-300 dark:focus:ring-primary-800"
+
+  defp select_class,
+    do:
+      "block rounded-lg border border-gray-300 bg-gray-50 p-2 text-sm text-gray-900 focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:focus:border-primary-500 dark:focus:ring-primary-500"
+
   @impl true
   def render(assigns) do
     ~H"""
-    <div class="min-h-screen bg-base-200">
-      <header class="bg-base-100 border-b border-base-300 px-4 py-3">
-        <div class="flex flex-wrap items-baseline gap-x-4 gap-y-1">
-          <h1 class="text-lg font-semibold">Krizová mapa</h1>
-          <p class="text-sm opacity-70">
-            {@total_count} událostí, {@located_count} se známou polohou
-          </p>
-          <nav class="ml-auto text-sm flex gap-3">
-            <.link navigate={~p"/cockpit"} class="link">Cockpit</.link>
-            <a href="/swagger" class="link">API</a>
-          </nav>
-        </div>
-      </header>
+    <Layouts.app flash={@flash} active={:map}>
+      <.page_header crumbs={[%{label: "Krizová mapa"}]}>
+        Krizová mapa
+        <:subtitle>{@total_count} událostí, {@located_count} se známou polohou</:subtitle>
+        <:actions>
+          <.button navigate={~p"/cockpit"}>
+            <.icon name="hero-command-line" class="size-4" /> Cockpit
+          </.button>
+          <.button href="/swagger">
+            <.icon name="hero-book-open" class="size-4" /> API
+          </.button>
+        </:actions>
+      </.page_header>
 
-      <div class="p-4 space-y-4">
-        <section class="bg-base-100 rounded-box p-3 flex flex-wrap gap-4 items-end">
+      <div class="space-y-4 p-4">
+        <section class="flex flex-wrap items-end gap-4 rounded-lg border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-700 dark:bg-gray-800">
           <div>
-            <p class="text-xs uppercase opacity-60 mb-1">Typ události</p>
+            <p class="mb-2 text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">
+              Typ události
+            </p>
             <div class="flex flex-wrap gap-1">
               <button
+                type="button"
                 phx-click="filter_type"
                 phx-value-type="all"
-                class={["btn btn-xs", @type == "all" && "btn-primary"]}
+                class={filter_button_class(@type == "all")}
               >
                 Vše
               </button>
               <button
                 :for={type <- @event_types}
+                type="button"
                 phx-click="filter_type"
                 phx-value-type={type.id}
-                class={["btn btn-xs", @type == type.id && "btn-primary"]}
+                class={filter_button_class(@type == type.id)}
               >
-                <span class="w-2 h-2 rounded-full" style={"background: #{type.color}"}></span>
+                <span class="size-2 rounded-full" style={"background: #{type.color}"}></span>
                 {type.label}
               </button>
             </div>
           </div>
 
-          <form id="radius-filter" phx-change="filter_radius" class="flex gap-2 items-end">
-            <label class="text-xs uppercase opacity-60">
+          <form id="radius-filter" phx-change="filter_radius" class="flex items-end gap-2">
+            <label class="text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">
               Okolí bodu
-              <select name="center" class="select select-xs select-bordered block mt-1">
+              <select name="center" class={["mt-1 normal-case tracking-normal", select_class()]}>
                 <option
                   :for={point <- @reference_points}
                   value={point.id}
@@ -209,9 +235,9 @@ defmodule CrisisMapWeb.MapLive do
                 </option>
               </select>
             </label>
-            <label class="text-xs uppercase opacity-60">
+            <label class="text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">
               Poloměr
-              <select name="radius" class="select select-xs select-bordered block mt-1">
+              <select name="radius" class={["mt-1 normal-case tracking-normal", select_class()]}>
                 <option value="" selected={is_nil(@radius_km)}>bez omezení</option>
                 <option :for={km <- @radius_options} value={km} selected={km == @radius_km}>
                   do {km} km
@@ -222,37 +248,43 @@ defmodule CrisisMapWeb.MapLive do
         </section>
 
         <div class="grid gap-4 lg:grid-cols-3">
-          <div class="lg:col-span-2 space-y-4">
+          <div class="space-y-4 lg:col-span-2">
             <div
               id="crisis-map"
               phx-hook=".Leaflet"
               phx-update="ignore"
-              class="w-full h-[420px] rounded-box border border-base-300 bg-base-100"
+              class="isolate h-[420px] w-full rounded-lg border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800"
             >
             </div>
 
-            <div :if={@selected} class="bg-base-100 rounded-box p-4">
+            <div
+              :if={@selected}
+              class="rounded-lg border border-gray-200 bg-white p-4 shadow-sm sm:p-6 dark:border-gray-700 dark:bg-gray-800"
+            >
               <div class="flex items-start gap-3">
                 <span
-                  class="mt-1 w-3 h-3 rounded-full shrink-0"
+                  class="mt-1.5 size-3 shrink-0 rounded-full"
                   style={"background: #{Catalog.event_type_color(@selected.type)}"}
                 ></span>
                 <div class="flex-1">
-                  <p class="text-xs uppercase opacity-60">
+                  <p class="text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">
                     {Catalog.event_type_label(@selected.type)}
                   </p>
-                  <h2 class="text-base font-semibold">{@selected.title}</h2>
-                  <dl class="mt-2 text-sm grid grid-cols-[8rem_1fr] gap-y-1">
-                    <dt class="opacity-60">Lokalita</dt>
+                  <h2 class="text-xl font-bold text-gray-900 dark:text-white">{@selected.title}</h2>
+                  <dl class="mt-3 grid grid-cols-[8rem_1fr] gap-y-2 text-sm text-gray-900 dark:text-white">
+                    <dt class="text-gray-500 dark:text-gray-400">Lokalita</dt>
                     <dd>
                       {@selected.location_text || "—"}
-                      <span :if={status_note(@selected)} class="badge badge-sm badge-warning ml-1">
+                      <span
+                        :if={status_note(@selected)}
+                        class="ml-1 rounded-md bg-yellow-100 px-2.5 py-0.5 text-xs font-medium text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300"
+                      >
                         {status_note(@selected)}
                       </span>
                     </dd>
-                    <dt class="opacity-60">Čas</dt>
+                    <dt class="text-gray-500 dark:text-gray-400">Čas</dt>
                     <dd>{when_occurred(@selected.occurred_at)}</dd>
-                    <dt class="opacity-60">Souřadnice</dt>
+                    <dt class="text-gray-500 dark:text-gray-400">Souřadnice</dt>
                     <dd>
                       <%= if Event.located?(@selected) do %>
                         {Float.round(Event.latitude(@selected), 5)}, {Float.round(
@@ -261,7 +293,7 @@ defmodule CrisisMapWeb.MapLive do
                         )}
                         <span
                           :if={@selected.geocoding_candidates && @selected.geocoding_candidates > 1}
-                          class="opacity-60"
+                          class="text-gray-500 dark:text-gray-400"
                         >
                           ({@selected.geocoding_candidates} kandidátů, skóre {@selected.geocoding_confidence})
                         </span>
@@ -269,50 +301,74 @@ defmodule CrisisMapWeb.MapLive do
                         neznámé
                       <% end %>
                     </dd>
-                    <dt class="opacity-60">Zdroj</dt>
+                    <dt class="text-gray-500 dark:text-gray-400">Zdroj</dt>
                     <dd class="font-mono text-xs">{@selected.external_id}</dd>
-                    <dt :if={distance(@selected)} class="opacity-60">Vzdálenost</dt>
+                    <dt :if={distance(@selected)} class="text-gray-500 dark:text-gray-400">
+                      Vzdálenost
+                    </dt>
                     <dd :if={distance(@selected)}>{distance(@selected)}</dd>
                   </dl>
-                  <p class="mt-3 text-sm">{@selected.description}</p>
+                  <p class="mt-4 text-sm text-gray-500 dark:text-gray-400">
+                    {@selected.description}
+                  </p>
                 </div>
-                <button phx-click="clear_selection" class="btn btn-ghost btn-xs">zavřít</button>
+                <button
+                  type="button"
+                  phx-click="clear_selection"
+                  class="inline-flex cursor-pointer items-center rounded-lg px-2 py-1 text-xs font-medium text-gray-500 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white"
+                >
+                  zavřít
+                </button>
               </div>
             </div>
           </div>
 
-          <section class="bg-base-100 rounded-box divide-y divide-base-300 overflow-hidden self-start">
-            <p class="px-3 py-2 text-xs uppercase opacity-60">Seznam událostí</p>
-            <button
-              :for={event <- @events}
-              phx-click="select"
-              phx-value-id={event.id}
-              class={[
-                "w-full text-left px-3 py-2 hover:bg-base-200",
-                @selected && @selected.id == event.id && "bg-base-200"
-              ]}
+          <section class="self-start overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
+            <p class="border-b border-gray-200 bg-gray-50 px-4 py-3 text-xs font-medium uppercase tracking-wider text-gray-500 dark:border-gray-700 dark:bg-gray-700 dark:text-gray-400">
+              Seznam událostí
+            </p>
+            <div class="divide-y divide-gray-200 dark:divide-gray-700">
+              <button
+                :for={event <- @events}
+                type="button"
+                phx-click="select"
+                phx-value-id={event.id}
+                class={[
+                  "w-full cursor-pointer px-4 py-3 text-left hover:bg-gray-100 dark:hover:bg-gray-700",
+                  @selected && @selected.id == event.id && "bg-gray-100 dark:bg-gray-700"
+                ]}
+              >
+                <span class="flex items-center gap-2">
+                  <span
+                    class="size-2.5 shrink-0 rounded-full"
+                    style={"background: #{Catalog.event_type_color(event.type)}"}
+                  ></span>
+                  <span class="flex-1 text-sm font-medium text-gray-900 dark:text-white">
+                    {event.title}
+                  </span>
+                  <span class="text-xs text-gray-500 dark:text-gray-400">
+                    {when_occurred(event.occurred_at)}
+                  </span>
+                </span>
+                <span class="block pl-4.5 text-xs text-gray-500 dark:text-gray-400">
+                  {event.location_text || "místo neuvedeno"}
+                  <span :if={status_note(event)} class="text-yellow-700 dark:text-yellow-400">
+                    · {status_note(event)}
+                  </span>
+                  <span :if={distance(event)}>· {distance(event)}</span>
+                </span>
+              </button>
+            </div>
+            <p
+              :if={@events == []}
+              class="px-4 py-6 text-center text-sm text-gray-500 dark:text-gray-400"
             >
-              <span class="flex items-center gap-2">
-                <span
-                  class="w-2.5 h-2.5 rounded-full shrink-0"
-                  style={"background: #{Catalog.event_type_color(event.type)}"}
-                ></span>
-                <span class="text-sm font-medium flex-1">{event.title}</span>
-                <span class="text-xs opacity-60">{when_occurred(event.occurred_at)}</span>
-              </span>
-              <span class="block text-xs opacity-70 pl-4.5">
-                {event.location_text || "místo neuvedeno"}
-                <span :if={status_note(event)} class="text-warning">· {status_note(event)}</span>
-                <span :if={distance(event)}>· {distance(event)}</span>
-              </span>
-            </button>
-            <p :if={@events == []} class="px-3 py-6 text-sm opacity-60 text-center">
               Filtru neodpovídá žádná událost.
             </p>
           </section>
         </div>
       </div>
-    </div>
+    </Layouts.app>
 
     <script :type={Phoenix.LiveView.ColocatedHook} name=".Leaflet">
       // The whole of the client. It renders what the server sends and reports

@@ -59,13 +59,6 @@ defmodule CrisisMap.MixProject do
        app: false,
        compile: false,
        depth: 1},
-      {:daisyui,
-       github: "saadeghi/daisyui",
-       tag: "v5.5.20",
-       sparse: "packages/bundle",
-       app: false,
-       compile: false,
-       depth: 1},
       {:req, "~> 0.5"},
       {:telemetry_metrics, "~> 1.0"},
       {:telemetry_poller, "~> 1.0"},
@@ -88,7 +81,12 @@ defmodule CrisisMap.MixProject do
       "ecto.setup": ["ecto.create", "ecto.migrate", "run priv/repo/seeds.exs"],
       "ecto.reset": ["ecto.drop", "ecto.setup"],
       test: ["ecto.create --quiet", "ecto.migrate --quiet", "test"],
-      "assets.setup": ["tailwind.install --if-missing", "esbuild.install --if-missing"],
+      "assets.setup": [
+        "tailwind.install --if-missing",
+        "esbuild.install --if-missing",
+        # Flowbite (component plugin and JS) is an npm dependency of assets/.
+        "cmd --cd assets yarn install --frozen-lockfile"
+      ],
       "assets.build": ["compile", "tailwind crisis_map", "esbuild crisis_map"],
       "assets.deploy": [
         "tailwind crisis_map --minify",
