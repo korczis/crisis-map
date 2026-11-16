@@ -1,0 +1,7 @@
+{
+  "name": "crisis_map-assets",
+  "private": true,
+  "dependencies": {
+    "flowbite": "^4.0.2"
+  }
+}

@@ -24,6 +24,9 @@ import {Socket} from "phoenix"
 import {LiveSocket} from "phoenix_live_view"
 import {hooks as colocatedHooks} from "phoenix-colocated/crisis_map"
 import topbar from "../vendor/topbar"
+// Flowbite JS behind every data-drawer/dropdown/tooltip attribute in the shell. The
+// Phoenix build re-initialises the components after each LiveView navigation.
+import "flowbite/dist/flowbite.phoenix.js"
 
 const csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute("content")
 const liveSocket = new LiveSocket("/live", Socket, {
